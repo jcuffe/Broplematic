@@ -1,26 +1,21 @@
-name: Synchronize Infrastructure
+name: Apply Infrastructure Changes
 
 # Build a plan on every PR against and push to master
 # Additionally, apply the plan on every push to master
 on: 
-  pull_request:
-    branches:
-      - master
-    paths:
-      - infrastructure/*
   push:
     branches:
       - master
     paths:
       - infrastructure/*
 
+env:
+  WORKING_DIRECTORY: ./infrastructure # TODO See if ./ is required
+
 jobs:
   create-plan:
     name: Generate Terraform Plan
     runs-on: ubuntu-latest
-
-    env:
-      WORKING_DIRECTORY: ./infrastructure # TODO See if ./ is required
 
     steps:
       - name: Checkout code
@@ -65,12 +60,6 @@ jobs:
 
     # Require manual approval for this job to proceed
     environment: Production 
-
-    # Only run this job when new code arrives in master branch
-    if: github.event_name == 'push' 
-
-    env:
-      WORKING_DIRECTORY: ./infrastructure # TODO See if ./ is required
 
     steps:
       - name: Checkout code
