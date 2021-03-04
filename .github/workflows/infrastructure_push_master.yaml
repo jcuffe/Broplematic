@@ -32,7 +32,7 @@ jobs:
             /opt/hostedtoolcache/gcloud
           key: infrastructure
       
-      - run: cp -r $GITHUB_WORKSPACE /opt/hostedtoolcache
+      - run: cp -r ${GITHUB_WORKSPACE} /opt/hostedtoolcache
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
