@@ -12,5 +12,5 @@ terraform {
 }
 
 resource "google_storage_bucket" "storage_bucket" {
-  name = "test-buket-13151gd-gdag"
+  name = "tet-buket-13151gd-gdag"
 }
