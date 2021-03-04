@@ -23,6 +23,7 @@ jobs:
       # Runs the Super-Linter action
       - name: Download existing Terraform state
         uses: actions/download-artifact@v2
+        continue-on-error: true
         with:
           name: tfstate
       
