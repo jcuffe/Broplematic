@@ -32,6 +32,8 @@ jobs:
             /opt/hostedtoolcache/gcloud
           key: infrastructure
       
+      - run: echo $GITHUB_WORKSPACE
+      - run: echo ${GITHUB_WORKSPACE}
       - run: cp -r ${GITHUB_WORKSPACE} /opt/hostedtoolcache
 
       - name: Set up Cloud SDK
