@@ -1,42 +1,122 @@
 name: Synchronize Infrastructure
 
-# Run this workflow every time a PR is made against master
+# Build a plan on every PR against and push to master
+# Additionally, apply the plan on every push to master
 on: 
-  workflow_dispatch:
-    # Allow manual triggering while developing
+  workflow_dispatch: # Allow manual triggering while developing
   pull_request:
+    branches:
+      - master
     paths:
-      - "infrastructure/*"
+      - infrastructure/*
+  push:
+    branches:
+      - master
+    paths:
+      - infrastructure/*
 
 jobs:
-  # Set the job key. The key is displayed as the job name
-  # when a job name is not provided
   create-plan:
     name: Generate Terraform Plan
     runs-on: ubuntu-latest
+
+    env:
+      WORKING_DIRECTORY: ./infrastructure # TODO See if ./ is required
+
     steps:
-      # Checks out a copy of your repository on the ubuntu-latest machine
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Initialize Terraform
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
+
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
 
-      # Runs the Super-Linter action
       - name: Download existing Terraform state
         uses: actions/download-artifact@v2
         continue-on-error: true
         with:
           name: tfstate
+          path: ${{ env.WORKING_DIRECTORY }}
       
       - name: Verify format
         run: terraform fmt
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Generate Plan
-        run: terraform plan --out=plan.tf
+        run: terraform plan -out=tfplan
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          TF_VAR_project: ${{ secrets.GCP_PROJECT }}
 
       - name: Store plan for application
         uses: actions/upload-artifact@v2
         with:
           name: tfplan
-          path: plan.tf
+          path: ${{ env.WORKING_DIRECTORY }}/tfplan
+  
+  apply-plan:
+    name: Apply Generated Terraform Plan
+    runs-on: ubuntu-latest
+
+    # Wait for the latest plan before applying
+    needs: create-plan 
+
+    # Require manual approval for this job to proceed
+    environment: Production 
+
+    # Only run this job when new code arrives in master branch
+    if: github.event_name == 'push' 
+
+    env:
+      WORKING_DIRECTORY: ./infrastructure # TODO See if ./ is required
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          export_default_credentials: true
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Download existing Terraform state
+        uses: actions/download-artifact@v2
+        continue-on-error: true
+        with:
+          name: tfstate
+          path: ${{ env.WORKING_DIRECTORY }}
+      
+      - name: Download existing Terraform plan
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan
+          path: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Apply Plan
+        run: terraform apply -auto-approve
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Store state for future plans
+        uses: actions/upload-artifact@v2
+        with:
+          name: tfstate
+          path: ${{ env.WORKING_DIRECTORY }}/terraform.tfstate
