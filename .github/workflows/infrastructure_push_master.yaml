@@ -10,12 +10,16 @@ on:
       - infrastructure/*
 
 env:
-  WORKING_DIRECTORY: ./infrastructure # TODO See if ./ is required
+  WORKING_DIRECTORY: ./infrastructure
 
 jobs:
   create-plan:
     name: Generate Terraform Plan
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
 
     steps:
       - name: Checkout code
@@ -29,19 +33,16 @@ jobs:
           export_default_credentials: true
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: jcuffe/setup-terraform@v1
       
       - name: Verify format
         run: terraform fmt
-        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Initialize Terraform
         run: terraform init
-        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Generate Plan
         run: terraform plan -out=tfplan
-        working-directory: ${{ env.WORKING_DIRECTORY }}
         env:
           TF_VAR_project: ${{ secrets.GCP_PROJECT }}
 
@@ -61,6 +62,10 @@ jobs:
     # Require manual approval for this job to proceed
     environment: Production 
 
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -73,7 +78,7 @@ jobs:
           export_default_credentials: true
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: jcuffe/setup-terraform@v1
       
       - name: Download existing Terraform plan
         uses: actions/download-artifact@v2
@@ -83,8 +88,6 @@ jobs:
 
       - name: Initialize Terraform
         run: terraform init
-        working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Apply Plan
         run: terraform apply -auto-approve tfplan
-        working-directory: ${{ env.WORKING_DIRECTORY }}
