@@ -33,7 +33,7 @@ jobs:
           key: infrastructure-tools
       
       - run: ls ${GITHUB_WORKSPACE}
-      - run: ls /opt/hostedtoolcache/terraform/0.14.7/amd64
+      - run: ls /opt/hostedtoolcache/terraform/0.14.7/
       # - run: cp -r ${GITHUB_WORKSPACE}/* /opt/hostedtoolcache
 
       - name: Set up Cloud SDK
