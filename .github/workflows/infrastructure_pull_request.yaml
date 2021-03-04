@@ -19,8 +19,8 @@ jobs:
         working-directory: ./infrastructure 
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
