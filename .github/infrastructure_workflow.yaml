@@ -1,0 +1,39 @@
+name: Synchronize Infrastructure
+
+# Run this workflow every time a PR is made against master
+on: 
+  pull_request:
+    paths:
+      - "infrastructure/*"
+
+jobs:
+  # Set the job key. The key is displayed as the job name
+  # when a job name is not provided
+  create-plan:
+    name: Generate Terraform Plan
+    runs-on: ubuntu-latest
+    steps:
+      # Checks out a copy of your repository on the ubuntu-latest machine
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Initialize Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      # Runs the Super-Linter action
+      - name: Download existing Terraform state
+        uses: actions/download-artifact@v2
+        with:
+          name: tfstate
+      
+      - name: Verify format
+        run: terraform fmt
+
+      - name: Generate Plan
+        run: terraform plan --out=plan.tf
+
+      - name: Store plan for application
+        uses: actions/upload-artifact@v2
+        with:
+          name: tfplan
+          path: plan.tf
