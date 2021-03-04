@@ -3,7 +3,6 @@ name: Synchronize Infrastructure
 # Build a plan on every PR against and push to master
 # Additionally, apply the plan on every push to master
 on: 
-  workflow_dispatch: # Allow manual triggering while developing
   pull_request:
     branches:
       - master
@@ -36,13 +35,6 @@ jobs:
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
-
-      - name: Download existing Terraform state
-        uses: actions/download-artifact@v2
-        continue-on-error: true
-        with:
-          name: tfstate
-          path: ${{ env.WORKING_DIRECTORY }}
       
       - name: Verify format
         run: terraform fmt
@@ -93,13 +85,6 @@ jobs:
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
-
-      - name: Download existing Terraform state
-        uses: actions/download-artifact@v2
-        continue-on-error: true
-        with:
-          name: tfstate
-          path: ${{ env.WORKING_DIRECTORY }}
       
       - name: Download existing Terraform plan
         uses: actions/download-artifact@v2
@@ -112,11 +97,5 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Apply Plan
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve tfplan
         working-directory: ${{ env.WORKING_DIRECTORY }}
-
-      - name: Store state for future plans
-        uses: actions/upload-artifact@v2
-        with:
-          name: tfstate
-          path: ${{ env.WORKING_DIRECTORY }}/terraform.tfstate
