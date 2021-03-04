@@ -30,9 +30,10 @@ jobs:
           path: |
             /opt/hostedtoolcache/terraform
             /opt/hostedtoolcache/gcloud
-          key: infrastructure
+          key: infrastructure-tools
       
-      - run: cp -r ${GITHUB_WORKSPACE}/infrastructure/* /opt/hostedtoolcache
+      - run: ls ${GITHUB_WORKSPACE}
+      - run: cp -r ${GITHUB_WORKSPACE}/* /opt/hostedtoolcache
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
@@ -83,9 +84,10 @@ jobs:
           path: |
             /opt/hostedtoolcache/terraform
             /opt/hostedtoolcache/gcloud
-          key: infrastructure
+          key: infrastructure-tools
 
-      - run: cp -r ${GITHUB_WORKSPACE} /opt/hostedtoolcache
+      - run: ls ${GITHUB_WORKSPACE}
+      - run: cp -r ${GITHUB_WORKSPACE}/* /opt/hostedtoolcache
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
