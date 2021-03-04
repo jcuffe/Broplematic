@@ -2,6 +2,8 @@ name: Synchronize Infrastructure
 
 # Run this workflow every time a PR is made against master
 on: 
+  workflow_dispatch:
+    # Allow manual triggering while developing
   pull_request:
     paths:
       - "infrastructure/*"
