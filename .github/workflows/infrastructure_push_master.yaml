@@ -32,9 +32,8 @@ jobs:
             /opt/hostedtoolcache/gcloud
           key: infrastructure
       
-      - run: echo $GITHUB_WORKSPACE
-      - run: echo ${GITHUB_WORKSPACE}
-      - run: cp -r ${GITHUB_WORKSPACE} /opt/hostedtoolcache
+      - run: cp -r ${GITHUB_WORKSPACE}/terraform /opt/hostedtoolcache
+      - run: cp -r ${GITHUB_WORKSPACE}/gcloud /opt/hostedtoolcache
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
